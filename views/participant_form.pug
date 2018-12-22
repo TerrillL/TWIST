@@ -21,6 +21,41 @@ block content
             option(value=highSchool._id selected=(highSchool._id.toString()==participant.highSchool ? 'selected' : false) ) #{highSchool.name}
           else
             option(value=highSchool._id) #{highSchool.name}
+      label(for='interest1') Primary Interest:
+      select#topic.form-control(type='select', placeholder='Select topic' name='interest1' required='true' )
+        for topic in topic_list
+          if participant
+            option(value=topic._id selected=(topic._id.toString()==participant.interest1 ? 'selected' : false) ) #{topic.title}
+          else
+            option(value=topic._id) #{topic.title}
+      label(for='Interest2') Second Interest:
+      select#topic.form-control(type='select', placeholder='Select topic' name='interest2' required='true' )
+        for topic in topic_list
+          if participant
+            option(value=topic._id selected=(topic._id.toString()==participant.interest2 ? 'selected' : false) ) #{topic.title}
+          else
+            option(value=topic._id) #{topic.title}
+      label(for='interest3') Third Interest:
+      select#topic.form-control(type='select', placeholder='Select topic' name='interest3' required='true' )
+        for topic in topic_list
+          if participant
+            option(value=topic._id selected=(topic._id.toString()==participant.interest3 ? 'selected' : false) ) #{topic.title}
+          else
+            option(value=topic._id) #{topic.title}
+      label(for='interest4') Fourth Interest:
+      select#topic.form-control(type='select', placeholder='Select topic' name='interest4' required='true' )
+        for topic in topic_list
+          if participant
+            option(value=topic._id selected=(topic._id.toString()==participant.interest4 ? 'selected' : false) ) #{topic.title}
+          else
+            option(value=topic._id) #{topic.title}
+      label(for='interest5') Fifth Interest:
+      select#topic.form-control(type='select', placeholder='Select topic' name='interest5' required='true' )
+        for topic in topic_list
+          if participant
+            option(value=topic._id selected=(topic._id.toString()==participant.interest5 ? 'selected' : false) ) #{topic.title}
+          else
+            option(value=topic._id) #{topic.title}
     button.btn.btn-primary(type='submit') Submit
   if errors 
     ul

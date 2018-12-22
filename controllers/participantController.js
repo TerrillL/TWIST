@@ -1,6 +1,7 @@
 var Participant = require('../models/participant');
 var HighSchool = require('../models/highschool');
 var Schedule = require('../models/schedule');
+var Topic = require('../models/topic');
 
 var async = require('async');
 
@@ -24,6 +25,7 @@ exports.participant_detail = function(req,res, next) {
         participant: function(callback) {
             Participant.findById(req.params.id)
                 .populate('highSchool')
+                .populate('topic')
                 .exec(callback)
         },
         highSchool: function(callback) {
@@ -43,11 +45,17 @@ exports.participant_detail = function(req,res, next) {
 
 // Display Participant create form on GET.
 exports.participant_create_get = function(req,res,next) {
-    HighSchool.find()
-    .sort([['name', 'ascending']])
-    .exec(function (err, highSchools) {
+  async.parallel({
+    highSchools: function(callback) {
+      HighSchool.find(callback)
+      .sort([['name', 'ascending']])
+    },
+    topics: function(callback) {
+      Topic.find(callback)
+    },
+  }, function (err, results) {
         if (err) { return next(err); }   
-        res.render('participant_form', { title: 'Create Participant', highSchool_list: highSchools });
+        res.render('participant_form', { title: 'Create Participant', highSchool_list: results.highSchools, topic_list: results.topics });
     });
 };
 
@@ -61,36 +69,47 @@ exports.participant_create_post = [
         .isAlphanumeric().withMessage('Last name has non-alphanumeric characters.'),
     body('address', 'Address is required').isLength({ min:1 }).trim(),
     body('email', 'Email is required').isLength({ min: 1 }).trim(),
-    body('highSchool', 'High School is required').isLength({ min: 1 }).trim(),
 
     // Sanitize fields.
-    sanitizeBody('firstName').trim().escape(),
-    sanitizeBody('lastName').trim().escape(),
-    sanitizeBody('address').trim().escape(),
-    sanitizeBody('email').trim().escape(),
+    sanitizeBody('*').trim().escape(),
 
     // Process request after validation and sanitization.
     (req, res, next) => {
 
         // Extract the validation errors from a request.
         const errors = validationResult(req);
+      
+        // Create a Participant object with escaped and trimmed data.
+        var participant = new Participant(
+          { lastName: req.body.lastName,
+            firstName: req.body.firstName,
+            address: req.body.address,
+            highSchool: req.body.highSchool,
+            email: req.body.email,
+            interest1: req.body.interest1,
+            interest2: req.body.interest2,
+            interest3: req.body.interest3,
+            interest4: req.body.interest4,
+            interest5: req.body.interest5
+            });
 
         if (!errors.isEmpty()) {
             // There are errors. Render form again with sanitized values/errors messages.
-            res.render('participant_form', { title: 'Create Participant', participant: req.body, errors: errors.array() });
+            async.parallel({
+              highSchools: function(callback) {
+                  HighSchool.find(callback)
+              },
+              topics: function(callback) {
+                  Topic.find(callback)
+              },
+            }, function (err, results) {
+                if (err) { return next(err); }   
+                res.render('participant_form', { title: 'Create Participant', highSchool_list: results.highSchools, topic_list: results.topics, errors: errors.array() });
+            });
             return;
         }
         else {
-            // Data from form is valid.
-
-            // Create a Participant object with escaped and trimmed data.
-            var participant = new Participant(
-                { lastName: req.body.lastName,
-                  firstName: req.body.firstName,
-                  address: req.body.address,
-                  highSchool: req.body.highSchool,
-                  email: req.body.email
-                });
+            // Data from form is valid.            
             participant.save(function (err) {
                 if (err) { return next(err); }
                 // Successful - redirect to new participant record.
@@ -135,7 +154,9 @@ exports.participant_update_get = function(req,res,next) {
         highSchools: function(callback) {
             HighSchool.find(callback)
         },
-
+        topics: function(callback) {
+            Topic.find(callback)
+        },
         }, function(err, results) {
             if (err) { return next(err); }
             if (results.participant==null) { // No results.
@@ -143,7 +164,7 @@ exports.participant_update_get = function(req,res,next) {
                 err.status = 404;
                 return next(err);
             }
-            res.render('participant_form', { title: 'Update  Participant', highSchool_list : results.highSchools, selected_highSchool : results.participant.highSchool._id, participant:results.participant });
+            res.render('participant_form', { title: 'Update  Participant', highSchool_list : results.highSchools, selected_highSchool : results.participant.highSchool._id, participant:results.participant, topic_list: results.topics });
         });
 
 };
@@ -160,10 +181,7 @@ exports.participant_update_post = [
     body('email', 'Email is required').isLength({ min: 1 }).trim(),
 
     // Sanitize fields.
-    sanitizeBody('firstName').trim().escape(),
-    sanitizeBody('lastName').trim().escape(),
-    sanitizeBody('address').trim().escape(),
-    sanitizeBody('email').trim().escape(),
+    sanitizeBody('*').trim().escape(),
     
     // Process request after validation and sanitization.
     (req, res, next) => {
@@ -178,6 +196,11 @@ exports.participant_update_post = [
             address: req.body.address,
             highSchool: req.body.highSchool,
             email: req.body.email,
+            interest1: req.body.interest1,
+            interest2: req.body.interest2,
+            interest3: req.body.interest3,
+            interest4: req.body.interest4,
+            interest5: req.body.interest5,
             _id: req.params.id
            });
 
@@ -199,11 +222,17 @@ exports.participant_update_post = [
 
 // Display Participant create form on GET.
 exports.participant_create_user_get = function(req,res,next) {
-    HighSchool.find()
-    .sort([['name', 'ascending']])
-    .exec(function (err, highSchools) {
+  async.parallel({
+    highSchools: function(callback) {
+      HighSchool.find(callback)
+      .sort([['name', 'ascending']])
+    },
+    topics: function(callback) {
+      Topic.find(callback)
+    },
+  }, function (err, results) {
         if (err) { return next(err); }   
-        res.render('participant_user_form', { title: 'Create Participant', highSchool_list: highSchools });
+        res.render('participant_user_form', { title: 'Create Participant', highSchool_list: results.highSchools, topic_list: results.topics });
     });
 };
 
@@ -220,39 +249,48 @@ exports.participant_create_user_post = [
     body('highSchool', 'High School is required').isLength({ min: 1 }).trim(),
 
     // Sanitize fields.
-    sanitizeBody('firstName').trim().escape(),
-    sanitizeBody('lastName').trim().escape(),
-    sanitizeBody('address').trim().escape(),
-    sanitizeBody('email').trim().escape(),
+    sanitizeBody('*').trim().escape(),
 
     // Process request after validation and sanitization.
     (req, res, next) => {
 
         // Extract the validation errors from a request.
         const errors = validationResult(req);
+      
+        // Create a Participant object with escaped and trimmed data.
+        var participant = new Participant(
+          { lastName: req.body.lastName,
+            firstName: req.body.firstName,
+            address: req.body.address,
+            highSchool: req.body.highSchool,
+            email: req.body.email,
+            interest1: req.body.interest1,
+            interest2: req.body.interest2,
+            interest3: req.body.interest3,
+            interest4: req.body.interest4,
+            interest5: req.body.interest5
+            });
 
         if (!errors.isEmpty()) {
             // There are errors. Render form again with sanitized values/errors messages.
-            res.render('participant_user_form', { title: 'Create Participant', participant: req.body, errors: errors.array() });
+            async.parallel({
+              highSchools: function(callback) {
+                  HighSchool.find(callback)
+              },
+              topics: function(callback) {
+                  Topic.find(callback)
+              },
+            }, function (err, results) {
+                if (err) { return next(err); }   
+                res.render('participant_form', { title: 'Create Participant', highSchool_list: results.highSchools, topic_list: results.topics, errors: errors.array() });
+            });
             return;
         }
-        else {
-            // Data from form is valid.
-
-            // Create a Participant object with escaped and trimmed data.
-            var participant = new Participant(
-                { lastName: req.body.lastName,
-                  firstName: req.body.firstName,
-                  address: req.body.address,
-                  highSchool: req.body.highSchool,
-                  email: req.body.email
-                });
             participant.save(function (err) {
                 if (err) { return next(err); }
                 // Successful - redirect to new participant record.
                 res.redirect('/users/submitted');
             });
-        }
     }
 ];
 

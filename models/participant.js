@@ -11,8 +11,11 @@ var ParticipantSchema = new Schema (
 	highSchool: {type: Schema.Types.ObjectId, ref: 'HighSchool', required: true},
 	timeStamp: {type: Date, default: Date.now},
 	participantType: {type: String},
-    //interest:{}, needs added
-    //session: needs added
+    interest1: {type: Schema.Types.ObjectId, ref: 'Topic', required: true},
+    interest2: {type: Schema.Types.ObjectId, ref: 'Topic', required: true},
+    interest3: {type: Schema.Types.ObjectId, ref: 'Topic', required: true},
+    interest4: {type: Schema.Types.ObjectId, ref: 'Topic', required: true},
+    interest5: {type: Schema.Types.ObjectId, ref: 'Topic', required: true}
 }
 );
 
