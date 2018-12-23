@@ -25,13 +25,21 @@ exports.participant_detail = function(req,res, next) {
         participant: function(callback) {
             Participant.findById(req.params.id)
                 .populate('highSchool')
-                .populate('topic')
+                .populate('interest1')
+                .populate('interest2')
+                .populate('interest3')
+                .populate('interest4')
+                .populate('interest5')
                 .exec(callback)
         },
         highSchool: function(callback) {
             Participant.find({ 'highschool': req.params.id })
             .exec(callback);
         },
+        topic: function(callback) {
+            Participant.find({ 'topic': req.params.id })
+            .exec(callback);
+        }
     }, function(err, results) {
         if (err) { return next(err); }
         if (results.participant==null) {
@@ -39,7 +47,7 @@ exports.participant_detail = function(req,res, next) {
             err.status = 404;
             return next(err);
         }
-        res.render('participant_detail', { title: 'Participant Detail', participant: results.participant, highSchools: results.highSchool });
+        res.render('participant_detail', { title: 'Participant Detail', participant: results.participant, highSchools: results.highSchool, topics: results.topic });
     })
 };
 

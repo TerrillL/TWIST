@@ -77,7 +77,7 @@ exports.schedule_detail = function(req,res,next) {
             .exec(callback);
         },
         presenter: function(callback) {
-            Schedule.find({ 'time': req.params.id })
+            Schedule.find({ 'presenter': req.params.id })
             .exec(callback);
         },
     }, function(err, results) {

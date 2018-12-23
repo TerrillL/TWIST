@@ -6,7 +6,14 @@ block content
   
   p #[strong School: ]
     a(href=participant.highSchool.url) #{participant.highSchool.name}
-  
+    
+  p #[strong Interest: ]
+  div(style='margin-left:10px;margin-top:-30px')
+    a(href=participant.interest1.url) <br> 1. #{participant.interest1.title} 
+    a(href=participant.interest2.url) <br> 2. #{participant.interest2.title}
+    a(href=participant.interest3.url) <br> 3. #{participant.interest3.title}
+    a(href=participant.interest4.url) <br> 4. #{participant.interest4.title}
+    a(href=participant.interest5.url) <br> 5. #{participant.interest5.title}
   div(style='margin-left:20px;margin-top:20px')
 
     h4 Participant
